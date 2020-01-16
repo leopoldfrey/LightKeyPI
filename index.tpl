@@ -30,6 +30,10 @@
    	<script>
    		// mode ou page
    		mode = 0;
+   		_ip = "";
+   		_mask = "";
+   		_univ = "";
+   		var slider;
 	
    		// envoie la valeur du potard au serveur
 		function sendFader() {
@@ -40,7 +44,13 @@
 			});
 	   	}
 	   	
-		// envoie des boutons au serveur
+		// affecte une valeur au fader
+   		function setFader(v) {
+   			slider.setValue(v);
+   			sendFader();
+   		}
+   		
+   		// envoie des boutons au serveur
 		function clickBut(func) {
 			//console.log("I was clicked : "+func);
 	    	$.get('/button/'+func, function( data ) {
@@ -50,44 +60,38 @@
 	    
 		// demande l'ip à l'utilisateur et l'envoie au serveur
 		function setIp() {
-			var txt;
-			var ip = prompt("Enter Ip Adress:", "127.0.0.1");
+			var ip = prompt("Enter Ip Address :", _ip);
 			if (ip == null || ip == "") {
-			   txt = "127.0.0.1";
 			} else {
-			   txt = ip;
+				$.get('/ip/'+ip, function( data ) {
+					treatData(data);
+				});
 			}
-			$.get('/ip/'+txt, function( data ) {
-				treatData(data);
-			});
+			
 	    }
 		
 		// demande le mask à l'utilisateur et l'envoie au serveur
 		function setMask() {
-	    	var txt;
-			var mask = prompt("Enter Mask:", "255.0.0.0");
+	    	var mask = prompt("Enter Mask :", _mask);
 			if (mask == null || mask == "") {
-			   txt = "255.0.0.0";
 			} else {
-			   txt = mask;
+				$.get('/mask/'+mask, function( data ) {
+					treatData(data);
+				});
 			}
-			$.get('/mask/'+txt, function( data ) {
-				treatData(data);
-			});
+			
 	    }
 	    
 		// demande l'univers à l'utilisateur et l'envoie au serveur
 		function setUniv() {
-	    	var txt;
-			var univ = prompt("Enter Universe (universe.subnet.net) :", "0.0.1");
+	    	var univ = prompt("Enter Universe (universe.subnet.net) :", _univ);
 			if (univ == null || univ == "") {
-			   txt = "0.0.1";
 			} else {
-			   txt = univ;
+			   $.get('/univ/'+univ, function( data ) {
+					treatData(data);
+				});
 			}
-			$.get('/univ/'+txt, function( data ) {
-				treatData(data);
-			});
+			
 	    }
 	    
 		// récupère l'état du serveur
@@ -121,11 +125,11 @@
 				$("#command").html(data.command);
 			
 			// configuration réseau
-			ip = data._ip;
-			mask = data._mask;
-			univ = data._univ;
+			_ip = data._ip;
+			_mask = data._mask;
+			_univ = data._univ;
 			
-			$("#dispIP").html("IP   : "+ip+"<br/>MASK : "+mask+"<br/>UNIV : "+univ);
+			$("#dispIP").html("IP   : "+_ip+"<br/>MASK : "+_mask+"<br/>UNIV : "+_univ);
 			
 			// mode d'output
 			switch(data.outmode) {
@@ -188,10 +192,10 @@
 					$("#content").append('<button id="allFad" class="but button1 b1 butfont4" onclick="clickBut(this.id)">ALL @<br/>FADER</button>');
 					$("#content").append('<input id="slider" type="text" data-slider-min="0" data-slider-max="100" data-slider-step="1" data-slider-value="0" data-slider-orientation="vertical"/>');
 					$("#content").append('<button id="allRamp" class="but button1 b1 butfont4" onclick="clickBut(this.id)">ALL @<br/>RAMP</button>');
-					$("#content").append('<button id="allFF" class="but button1 b1 butfont4" onclick="clickBut(this.id)">ALL @<br/>FULL</button>');
-					$("#content").append('<button id="all50" class="but button1 b1 butfont4" onclick="clickBut(this.id)">ALL @<br/>50</button>');
-					$("#content").append('<button id="all0" class="but button1 b1 butfont4" onclick="clickBut(this.id)">ALL @<br/>0</button>');
-					var slider = new Slider('#slider', {
+					$("#content").append('<button id="allFF" class="but button1 b1 butfont4" onclick="setFader(100)">ALL @<br/>FULL</button>');
+					$("#content").append('<button id="all50" class="but button1 b1 butfont4" onclick="setFader(50)">ALL @<br/>50</button>');
+					$("#content").append('<button id="all0" class="but button1 b1 butfont4" onclick="setFader(0)">ALL @<br/>0</button>');
+					slider = new Slider('#slider', {
 						reversed: true,
 						ticks: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
 						formatter: function(value) {

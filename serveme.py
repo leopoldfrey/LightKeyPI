@@ -114,12 +114,12 @@ def button(but):
             command += " @ "
         elif but == "full" :
             command += " FULL "
-        elif but == "allFF" :
-            command = 'ALL @ FULL'
-        elif but == "all50" :
-            command = 'ALL @ 50'
-        elif but == "all0" :
-            command = 'ALL @ 0'
+        #elif but == "allFF" :
+        #    command = 'ALL @ FULL'
+        #elif but == "all50" :
+        #    command = 'ALL @ 50'
+        #elif but == "all0" :
+        #    command = 'ALL @ 0'
         elif but == "allFad" :
             command = 'ALL @ '+fadV
         elif but == "allRamp" :
