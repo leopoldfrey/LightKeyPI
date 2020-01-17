@@ -1,0 +1,10 @@
+{
+  "name": "LightKeyPi",
+  "description": "",
+  "image": "heroku/python",
+  "repository": "https://github.com/leopoldfrey/LightKeyPI",
+  "keywords": ["python", "" ],
+  "addons": [ "" ],
+  "env": {},
+  "environments": {}
+}
