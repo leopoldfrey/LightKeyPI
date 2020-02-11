@@ -234,6 +234,9 @@ body
 .slider.slider-vertical .slider-handle {
     margin-top: -30px;
     background: rgb(255,145,146);/*rgb(41,253,47);*/
+    /*-webkit-box-shadow: inset -2px -2px 2px 1px rgba(0,0,0,0.75);
+	-moz-box-shadow: inset -2px -2px 2px 1px rgba(0,0,0,0.75);
+	box-shadow: inset -2px -2px 2px 1px rgba(0,0,0,0.75);*/
 }
 
 .slider-track-high {
@@ -253,6 +256,19 @@ body
     margin-top: 0px;
     z-index: -10;
     left: calc(50% - 25px);
+}
+
+.slider-tick-label {
+	color: rgb(67,187,186);
+	font-size: 12px;
+	font-family: OrkneyRegular;
+	margin-top: 0px;
+	position: relavite;
+}
+
+.slider.slider-vertical .slider-tick-label-container {
+	padding-top: 43px;
+	margin-left: -15px;
 }
 
 .slider-tick.round {

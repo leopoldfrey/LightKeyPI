@@ -404,6 +404,8 @@ def clear():
         command = "none"
         last = "none"
         #print("OTHER "+command[-6:])
+        
+    interpAll()
 
 # initialise/vide le buffer dmx
 def clearBuffer():
@@ -436,37 +438,95 @@ def testCommand():
 def interpCommand():
     global command
     global commands
-    print("LAST CMD : ", command)
+    #print("LAST CMD : ", command)
     commands.append(command)
     command = "none"
     interpAll()
 
-# interprète toute les commandes de la trame + les mémoires      
+# interprète toutes les commandes de la trame + les mémoires      
 def interpAll():
+    clearBuffer()
+    if len(commands) > 0 :
+        #print("INTERP GLOBAL")
+        for x in commands :
+            interpOne(x)
     if m1on:
+        #print("INTERP M1")
         for x in m1 :
-            print("INTERP M1 : ", x)
+            interpOne(x)
     if m2on:
+        #print("INTERP M2")
         for x in m2 :
-            print("INTERP M2 : ", x)
+            interpOne(x)
     if m3on:
+        #print("INTERP M3")
         for x in m3 :
-            print("INTERP M3 : ", x)
+            interpOne(x)
     if m4on:
+        #print("INTERP M4")
         for x in m4 :
-            print("INTERP M4 : ", x)
+            interpOne(x)
     if m5on:
+        #print("INTERP M5")
         for x in m5 :
-            print("INTERP M5 : ", x)
-    for x in commands :
-        print("INTERP GLOBAL : ", x)
+            interpOne(x)
+                        
+    print("BUFFER ",buffer)
+    sendBuffer()
+
+# interprète une seule commande      
+def interpOne(cmd):
+    global buffer
+    #print("INTERP ",cmd)
+    spl = cmd.split(' @ ')
+    if spl[1] == "FULL" :
+        atValue = 100
+    elif spl[1] == "RAMP" :
+        atValue = "RAMP"
+    else:
+        try:
+            atValue = int(spl[1])
+        except:
+            atValue = 100
+    idx = 0
+    prevNum = -1
+    prevFunc = "none"
+    selSpl = spl[0].split(' ')
+    selection = []
+    while(idx < len(selSpl)):
+        try:
+            n = int(selSpl[idx])
+            if n > 512 :
+                n = 512
+            if(prevFunc == "none"):
+                selection.append(n)
+            elif prevFunc == "+" :
+                selection.append(n)
+            elif prevFunc == "-" :
+                selection.remove(n)
+            elif prevFunc == "THRU" :
+                for x in range(prevNum, n+1):
+                    selection.append(x)
+            prevNum = n
+        except:
+            if selSpl[idx] == "ALL" :
+                for x in range(1, 512+1):
+                    selection.append(x)
+            else:   
+                prevFunc = selSpl[idx]
+        idx += 1
+    selection = list(set(selection))
+    print(">>>>> ",selection, " @ ", atValue)
+    for x in selection :
+        buffer[x-1] = atValue
 
 # envoie le buffer dans le DMX     
 def sendBuffer():
     print("TODO SEND BUFFER TO DMX")
     #dépends de outmode & active & paramètres réseau
+    #attention quand ALL @ RAMP est activé la valeur dans le buffer est 'RAMP'
   
-# si les paramètres réseau outmode/ip/mask/univ change c'est ici que ça se passe 
+# si les paramètres réseau outmode/ip/mask/univ changent c'est ici que ça se passe 
 def onNetworkChange():
     print("TODO NETWORK PARAMETERS CHANGED")   
 

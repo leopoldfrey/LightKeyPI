@@ -1,9 +1,7 @@
 {
     "state": true,
     "command": "none",
-    "commands": [
-        "ALL @ 50"
-    ],
+    "commands": [],
     "_ip": "10.0.0.4",
     "_mask": "255.255.255.0",
     "_univ": "1.1.5",
@@ -15,7 +13,7 @@
     "m2": {
         "on": true,
         "content": [
-            "1 @ 06"
+            "501 THRU 507 @ 16"
         ]
     },
     "m3": {
@@ -32,7 +30,9 @@
         ]
     },
     "m5": {
-        "on": false,
-        "content": []
+        "on": true,
+        "content": [
+            "1 @ 00"
+        ]
     }
 }
