@@ -384,6 +384,7 @@
 					$("#content").append('<button id="del" aria-label="Delete memory" class="but button1 butfont2 b3" onclick="delMem()">DEL</button>');
 					break;
 			}
+			
 		}
 		
 		//initialisation une fois que la page est chargée

@@ -154,6 +154,8 @@ def recMem(m):
     global m4on
     global m5on
     #print("REC MEM : ", m)
+    if(len(commands)==0):
+        return
     if(m == 'm1'):
         m1on = True
         m1.clear()
