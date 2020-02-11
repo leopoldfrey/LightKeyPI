@@ -121,7 +121,7 @@
 			}
 			
 			// commande en cours (+ affichage des mémoires si actives)
-			if(data.command == "none") {
+			if(data.command == "none" || data.command == "") {
 				$("#command").css('font-size', '10px');
 				if((data.commands && data.commands != "") 
 						|| data.m1.on && data.m1.content != "" 
