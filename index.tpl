@@ -133,31 +133,31 @@
 					if(data.m1.on && data.m1.content != null)
 						for (var c in data.m1.content) {
 						     //console.log(data.commands[c]);
-						     $("#command").append("<li>"+data.m1.content[c]+"</li>");
+						     $("#command").append("<li class='mem'>"+data.m1.content[c]+"</li>");
 						}
 					if(data.m2.on && data.m2.content != null)
 						for (var c in data.m2.content) {
 						     //console.log(data.commands[c]);
-						     $("#command").append("<li>"+data.m2.content[c]+"</li>");
+						     $("#command").append("<li class='mem'>"+data.m2.content[c]+"</li>");
 						}
 					if(data.m3.on && data.m3.content != null)
 						for (var c in data.m3.content) {
 						     //console.log(data.commands[c]);
-						     $("#command").append("<li>"+data.m3.content[c]+"</li>");
+						     $("#command").append("<li class='mem'>"+data.m3.content[c]+"</li>");
 						}
 					if(data.m4.on && data.m4.content != null)
 						for (var c in data.m4.content) {
 						     //console.log(data.commands[c]);
-						     $("#command").append("<li>"+data.m4.content[c]+"</li>");
+						     $("#command").append("<li class='mem'>"+data.m4.content[c]+"</li>");
 						}
 					if(data.m5.on && data.m5.content != null)
 						for (var c in data.m5.content) {
 						     //console.log(data.commands[c]);
-						     $("#command").append("<li>"+data.m5.content[c]+"</li>");
+						     $("#command").append("<li class='mem'>"+data.m5.content[c]+"</li>");
 						}
 					for (var c in data.commands) {
 					     //console.log(data.commands[c]);
-					     $("#command").append("<li>"+data.commands[c]+"</li>");
+					     $("#command").append("<li class='def'>"+data.commands[c]+"</li>");
 					}
 					$("#command").css('background-color', 'rgb(41,253,47)');
 				} else {

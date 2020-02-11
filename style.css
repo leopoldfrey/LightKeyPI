@@ -55,14 +55,31 @@ body
 .cmd li {
 	display: inline-block;
 	padding-left: 8px;
+	padding-bottom: 2px;
 }
 
-.cmd li::before {
+.def {
+	color: darkred;
+	font-family: OrkneyRegular;
+}
+
+.def::before {
 	content:"[";
 }
-
-.cmd li::after {
+.def::after {
 	content:"]";
+}
+
+.mem {
+	color: darkgreen;
+	font-family: OrkneyItalic;
+}
+
+.mem::before {
+	content:"(";
+}
+.mem::after {
+	content:")";
 }
 
 .but {
