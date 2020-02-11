@@ -195,7 +195,7 @@
 					break;
 			}
 			
-			if(data.m1.on == true) {
+			if(data.m1.on) {
 				$("#m1").removeClass("but4notnull");	
 				$("#m1").addClass("but4on");
 			} else {
@@ -297,15 +297,17 @@
 					treatData(data);
 				});
 			} else if (memF == "rec") {
+				memF = "none";
 				$.get('/recMem/'+mem, function( data ) {
 					treatData(data);
 				});
-				memF = "none";
 			} else if (memF == "del") {
+				memF = "none";
+				//$("#"+mem).removeClass("but4on");
+				//$("#"+mem).removeClass("but4notnull");
 				$.get('/delMem/'+mem, function( data ) {
 					treatData(data);
 				});
-				memF = "none";
 			}
 			treatMem();
 		}

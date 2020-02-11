@@ -194,6 +194,11 @@ def recMem(m):
 # vider une mémoire    
 @route('/delMem/<m>')
 def delMem(m):
+    global m1on
+    global m2on
+    global m3on
+    global m4on
+    global m5on
     #print("DEL MEM : ", m)
     if(m == 'm1'):
         m1on = False
