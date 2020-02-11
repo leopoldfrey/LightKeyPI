@@ -1,0 +1,34 @@
+{
+    "state": true,
+    "command": "none",
+    "commands": [],
+    "_ip": "10.0.0.4",
+    "_mask": "255.255.255.0",
+    "_univ": "1.1.5",
+    "outmode": 0,
+    "m1": {
+        "on": false,
+        "content": []
+    },
+    "m2": {
+        "on": false,
+        "content": [
+            "55 @ 60"
+        ]
+    },
+    "m3": {
+        "on": false,
+        "content": [
+            "45 THRU 49 - 48 @ 55",
+            "14 @ 20"
+        ]
+    },
+    "m4": {
+        "on": false,
+        "content": []
+    },
+    "m5": {
+        "on": false,
+        "content": []
+    }
+}
