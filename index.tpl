@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Akwariom's LightKey is a remote control for the LightKeyPI device">
     <meta name="apple-mobile-web-app-capable" content="yes">
-	<link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
 	<link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
 	<link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
 	<link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
