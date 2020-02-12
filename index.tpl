@@ -323,7 +323,7 @@
 		}
 	
 		function doModeSwitch() {
-			$("#page").fadeOut("fast", function()
+			$("#page").fadeOut(100, function()
 			{
 				$("#page").empty();
 				//$("#content").empty();
@@ -397,7 +397,7 @@
 				}
 				$.get('/button/mode', function( data ) {
 					treatData(data);
-					$("#page").fadeIn("fast");
+					$("#page").fadeIn(100);
 				});
 			});
 		}
