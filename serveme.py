@@ -334,13 +334,14 @@ class LightKeyServer():
     
     def clear(self):
         # vider la commande / la trame en cours
-        print('CLEAR')
+        #print('CLEAR')
         if self.last == "pop" :
             self.commands.clear()
             self.command = "none"
             self.last = "none"
         elif self.last == "none" :
-            self.commands.pop()
+            if len(self.commands) > 0 :
+                self.commands.pop()
             self.command = "none"
             self.last = "pop"
         elif self.last == "num" :

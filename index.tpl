@@ -32,6 +32,7 @@
    	<script>
    		// mode ou page
    		mode = 0;
+   		prevMode = -1;
    		_ip = "";
    		_mask = "";
    		_univ = "";
@@ -316,15 +317,19 @@
 		
 		// bascule d'un mode visuel à l'autre
 		function switchMode() {
+			prevMode = mode;
 			mode++;
 			if(mode > 3)
 				mode = 0;
 			//console.log("switchMode : "+mode);
-			doModeSwitch();
+			switchTab();
 		}
 	
-		function doModeSwitch() {
-			$("#page").fadeOut(100, function()
+		fadeInDur = 180;
+		fadeOutDur = 180;
+		
+		function switchTab() {
+			/*$("#page").fadeOut(100, function()
 			{
 				$("#page").empty();
 				//$("#content").empty();
@@ -400,12 +405,76 @@
 					treatData(data);
 					$("#page").fadeIn(100);
 				});
-			});
+			});*/
+			switch(prevMode)
+			{
+				case -1:// INIT
+					$("#page1").fadeIn(fadeInDur);
+					$("#page2").fadeOut(fadeOutDur);
+					$("#page3").fadeOut(fadeOutDur);
+					$("#page4").fadeOut(fadeOutDur);
+					break;
+				case 0:
+					$("#page1").fadeOut(fadeOutDur, function(){
+						openTab();
+					});
+					break;
+				case 1:
+					$("#page2").fadeOut(fadeOutDur, function(){
+						openTab();
+					});
+					break;
+				case 2:
+					$("#page3").fadeOut(fadeOutDur, function(){
+						openTab();
+					});
+					break;
+				case 3:
+					$("#page4").fadeOut(fadeOutDur, function(){
+						openTab();
+					});
+					break;
+			}
+			
+			/*$.get('/button/mode', function( data ) {
+				treatData(data);
+				$("#page").fadeIn(100);
+			});//*/
 		}
 		
+		
+		function openTab()
+		{
+			switch(mode)
+			{
+				case 0:
+					$("#page1").fadeIn(fadeInDur);
+					break;
+				case 1:
+					$(".slider-tick-label").css("opacity","0");
+					$("#page2").fadeIn(fadeInDur,function(){
+						slider.refresh();
+						setTimeout(function(){
+							$(".slider-tick-label").css("opacity","1");
+						}, 100);
+						slider.setValue(fadV);
+						slider.on('slideStop', function(slideEvt) {
+							sendFader();
+						});
+						
+					});
+					break;
+				case 2:
+					$("#page3").fadeIn(fadeInDur);
+					break;
+				case 3:
+					$("#page4").fadeIn(fadeInDur);
+					break;
+			}
+		}
 		//initialisation une fois que la page est chargée
 		$(window).on("load",function() {
-			doModeSwitch();
+			switchTab();
 			getState();
 		});
 	</script>
@@ -416,9 +485,59 @@
 		<button id="mode" aria-label="Mode" class="but button1 butfont2 b2" onclick="switchMode()">MODE</button>
 		<button id="active" aria-label="On/Off" class="but button2 butfont2 b3" onclick="clickBut(this.id)">ON</button>
 		<button id="command" aria-label="Command Line" class="cmd bb3" onclick="clickBut(this.id)"></button>
-		<span id='page'>
-			<!-- c'est ici que vont s'insérer les éléments dynamiquement -->
+		<span id='page1' class='page' style='display: none'>
+			<button id="plus" aria-label="+" class="but button1 b1" onclick="clickBut(this.id)">+</button>
+			<button id="minus" aria-label="-" class="but button1 b2 butfont3" onclick="clickBut(this.id)">-</button>
+			<button id="thru" aria-label="thru" class="but button1 butfont2 b3" onclick="clickBut(this.id)">THRU</button>
+			<button id="7" aria-label="7" class="but button1 b1" onclick="clickBut(this.id)">7</button>
+			<button id="8" aria-label="8" class="but button1 b2" onclick="clickBut(this.id)">8</button>
+			<button id="9" aria-label="9" class="but button1 b3" onclick="clickBut(this.id)">9</button>
+			<button id="4" aria-label="4" class="but button1 b1" onclick="clickBut(this.id)">4</button>
+			<button id="5" aria-label="5" class="but button1 b2" onclick="clickBut(this.id)">5</button>
+			<button id="6" aria-label="6" class="but button1 b3" onclick="clickBut(this.id)">6</button>
+			<button id="1" aria-label="1" class="but button1 b1" onclick="clickBut(this.id)">1</button>
+			<button id="2" aria-label="2" class="but button1 b2" onclick="clickBut(this.id)">2</button>
+			<button id="3" aria-label="3" class="but button1 b3" onclick="clickBut(this.id)">3</button>
+			<button id="clear" aria-label="clear" class="but button1 butfont2 b1" onclick="clickBut(this.id)">CLEAR</button>
+			<button id="0" aria-label="0" class="but button1 b2" onclick="clickBut(this.id)">0</button>
+			<button id="at" aria-label="at level" class="but button1 b3 butfont3" onclick="clickBut(this.id)">@</button>
 		</span>
+		<span id='page2' class='page' style='display: none'>
+			<button id="allFad" aria-label="all at fader level" class="but button1 b1 butfont4" onclick="clickBut(this.id)">ALL @<br/>FADER</button>
+			<input id="slider" aria-label="fader" type="text" data-slider-min="0" data-slider-max="100" data-slider-step="1" data-slider-value="0" data-slider-orientation="vertical"/>
+			<button id="allRamp" aria-label="all at ramp" class="but button1 b1 butfont4" onclick="clickBut(this.id)">ALL @<br/>RAMP</button>
+			<button id="allFF" aria-label="all at 100%" class="but button1 b1 butfont4" onclick="setFader(100)">ALL @<br/>FULL</button>
+			<button id="all50" aria-label="all at 50%" class="but button1 b1 butfont4" onclick="setFader(50)">ALL @<br/>50</button>
+			<button id="all0" aria-label="all at 0%" class="but button1 b1 butfont4" onclick="setFader(0)">ALL @<br/>0</button>
+			<script>
+				slider = new Slider('#slider', {
+					reversed: true,
+					ticks: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+					ticks_labels: ['0', '10', '20', '30', '40', '50', '60', '70', '80', '90', '100'],
+					formatter: function(value) {
+						return '';
+					}
+				});
+			</script>
+		</span>
+		<span id='page3' class='page' style='display: none'>
+			<button id="outLK" aria-label="Only lightkey" class="but button1 bb3 butfont5" onclick="clickBut(this.id)">ONLY LIGHTKEY<br/>ON DMX OUTPUT</button>
+			<button id="outMerge" aria-label="Merge lightkey and dmx in" class="but button1 bb3 butfont5" onclick="clickBut(this.id)">MERGE DMX-IN & LIGHTKEY<br/>ON DMX OUTPUT</button>
+			<button id="outArtnet" aria-label="Artnet Output" class="but button1 bb3 butfont5" onclick="clickBut(this.id)">ARTNET OUTPUT</button>
+			<button id="setIp" aria-label="Set Network Ip Address" class="but button1 b1 butfont5" onclick="setIp()">SET<br/>IP</button>
+			<button id="setMask" aria-label="Set Network Mask" class="but button1 b2 butfont5" onclick="setMask()">SET<br/>MASK</button>
+			<button id="setUniv" aria-label="Set Artnet Universe" class="but button1 b3 butfont5" onclick="setUniv()">SET<br/>UNIV</button>
+			<button id="dispIP" aria-label="Display Network Parameters" class="but button3 bb3 butfont6"></button>
+		</span>
+		<span id='page4' class='page' style='display: none'>
+			<button id="m1" aria-label="Memory 1" class="but button4 bb2 butfont2" onclick="toggleMem(this.id)">MEM 1</button>
+			<button id="m2" aria-label="Memory 2" class="but button4 bb2 butfont2" onclick="toggleMem(this.id)">MEM 2</button>
+			<button id="m3" aria-label="Memory 3" class="but button4 bb2 butfont2" onclick="toggleMem(this.id)">MEM 3</button>
+			<button id="m4" aria-label="Memory 4" class="but button4 bb2 butfont2" onclick="toggleMem(this.id)">MEM 4</button>
+			<button id="rec" aria-label="Record memory" class="but button1 butfont2 b3" onclick="recMem()">REC</button>
+			<button id="m5" aria-label="Memory 5" class="but button4 bb2 butfont2" onclick="toggleMem(this.id)">MEM 5</button>
+			<button id="del" aria-label="Delete memory" class="but button1 butfont2 b3" onclick="delMem()">DEL</button>
+		</span>			
 	</div>
 </body>
 </html>

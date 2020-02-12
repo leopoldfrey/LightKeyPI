@@ -2,16 +2,16 @@
     "state": true,
     "command": "none",
     "commands": [
-        "ALL @ 29"
+        "11 @ 66"
     ],
-    "_ip": "10.0.0.4",
-    "_mask": "255.255.255.0",
-    "_univ": "1.1.5",
-    "outmode": 0,
+    "_ip": "2.0.0.1",
+    "_mask": "255.0.0.0",
+    "_univ": "0.0.1",
+    "outmode": 2,
     "m1": {
         "on": false,
         "content": [
-            "11 @  FULL"
+            "45 THRU 88 @  FULL"
         ]
     },
     "m2": {

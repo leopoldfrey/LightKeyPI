@@ -38,7 +38,7 @@ body
 	margin: auto;
 }
 
-#page {
+.page {
 	display: grid;
 	justify-content: center;
 	grid-template-columns: 100% 100% 100%;
@@ -274,6 +274,7 @@ body
 	margin-top: 0px;
 	position: relavite;
 	height: 26.3px;
+	transition: 0.3s;
 }
 
 .slider.slider-vertical .slider-tick-label-container {
