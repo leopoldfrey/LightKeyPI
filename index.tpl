@@ -39,6 +39,8 @@
    		memF = "none";
    		var fadV = 0;
    		var slider;
+   		fadeInDur = 100;
+		fadeOutDur = 80;
 	
    		// envoie la valeur du potard au serveur
 		function sendFader() {
@@ -321,13 +323,9 @@
 			mode++;
 			if(mode > 3)
 				mode = 0;
-			//console.log("switchMode : "+mode);
 			switchTab();
 		}
 	
-		fadeInDur = 180;
-		fadeOutDur = 180;
-		
 		function switchTab() {
 			/*$("#page").fadeOut(100, function()
 			{
@@ -435,11 +433,6 @@
 					});
 					break;
 			}
-			
-			/*$.get('/button/mode', function( data ) {
-				treatData(data);
-				$("#page").fadeIn(100);
-			});//*/
 		}
 		
 		
