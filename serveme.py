@@ -1,540 +1,507 @@
 import os, re, json
-from bottle import template, static_file, route, run
+from bottle import static_file, template, Bottle
 
-print("LightKeyPI starting...")
-
-# état du serveur on/off
-active = True
-# commande en cours
-command = "none"
-commands = []
-last = "none"
-buffer = []
-# valeur du potard page 2 (0-100%)
-fadV = "0"
-# mode de sortie
-outmode = 0 # 0 : light only / 1 : merge / 2 : artnet
-# config réseau
-_ip = "2.0.0.1"
-_mask = "255.0.0.0"
-_univ = "0.0.1"
-
-# stockage des mémoires et leur état on/off
-m1on = False
-m1 = []
-m2on = False
-m2 = []
-m3on = False
-m3 = []
-m4on = False
-m4 = []
-m5on = False
-m5 = []
-
-# sert à retourner les infos à la page web et à stocker la config dans le fichier json
-def response():
-    return { 'state': active, 
-            'command': command, 
-            'commands': commands, 
-            '_ip': _ip, 
-            '_mask': _mask, 
-            '_univ': _univ, 
-            'outmode': outmode, 
-            'm1': { 
-                'on': m1on, 
-                'content':m1 
-                }, 
-            'm2': {
-                'on':m2on, 
-                'content':m2
-                }, 
-            'm3': {
-                'on':m3on,
-                'content':m3
-                }, 
-            'm4': {
-                'on':m4on,
-                'content':m4
-                }, 
-            'm5': {
-                'on':m5on,
-                'content':m5
-                }
-            }
-
-# fonction qui renvoie la page web
-@route('/')
-def index():
-    return template('index')
-   
-# fonction pour renvoyer les fichiers statiques
-@route('/<filename>')
-def serve(filename):
-    return static_file(filename, root='./'); 
+class LightKeyServer():
     
-# retourne l'état en cours du serveur vers la page web
-@route('/state')
-def state():
-    return response()
-
-# c'est là que le potard entre
-@route('/fader/<v>')
-def fader(v):
-    global fadV
-    global last
-    global last
-    global command
-    fadV = v
-    print('> fader :',fadV)
-    command = 'ALL @ '+fadV
-    last = "allFad"
-    testCommand()
-    return response()
-  
-#set IP
-@route('/ip/<v>')
-def ip(v):
-    global _ip
-    _ip = v
-    print('> TODO ip :', _ip)
-    onNetworkChange()
-    savePrefs()
-    return response()
-   
-#set Mask 
-@route('/mask/<v>')
-def mask(v):
-    global _mask
-    _mask = v
-    print('> mask :', _mask)
-    onNetworkChange()
-    savePrefs()
-    return response()
-    
-#set Universe
-@route('/univ/<v>')
-def univ(v):
-    global _univ
-    _univ = v
-    print('> univ :', _univ)
-    onNetworkChange()
-    savePrefs()
-    return response()
- 
-# mettre une mémoire on/off 
-@route('/togMem/<m>')    
-def togMem(m):
-    global m1on
-    global m2on
-    global m3on
-    global m4on
-    global m5on
-    
-    #print("TOGGLE MEM : ", m)
-    if(m == "m1" and len(m1) > 0):
-        m1on = not m1on
-    elif(m == "m2" and len(m2) > 0):
-        m2on = not m2on
-    elif(m == "m3" and len(m3) > 0):
-        m3on = not m3on
-    elif(m == "m4" and len(m4) > 0):
-        m4on = not m4on
-    elif(m == "m5" and len(m5) > 0):
-        m5on = not m5on
+    def __init__(self):
+        # état du serveur on/off
+        self.active = True
+        # commande en cours
+        self.command = "none"
+        self.commands = []
+        self.last = "none"
+        self.buffer = []
+        # valeur du potard page 2 (0-100%)
+        self.fadV = "0"
+        # mode de sortie
+        self.outmode = 0 # 0 : light only / 1 : merge / 2 : artnet
+        # config réseau
+        self._ip = "2.0.0.1"
+        self._mask = "255.0.0.0"
+        self._univ = "0.0.1"
         
-    interpAll()
-    return response()
-
-# stocker la trame dans une mémoire
-@route('/recMem/<m>')
-def recMem(m):
-    global m1on
-    global m2on
-    global m3on
-    global m4on
-    global m5on
-    #print("REC MEM : ", m)
-    if(len(commands)==0):
-        return
-    if(m == 'm1'):
-        m1on = True
-        m1.clear()
-        for c in commands :
-            m1.append(c)
-        clearCommands()
-    elif m == 'm2':
-        m2on = True
-        m2.clear()
-        for c in commands :
-            m2.append(c)
-        clearCommands()
-    elif m == 'm3':
-        m3on = True
-        m3.clear()
-        for c in commands :
-            m3.append(c)
-        clearCommands()
-    elif m == 'm4':
-        m4on = True
-        m4.clear()
-        for c in commands :
-            m4.append(c)
-        clearCommands()
-    elif m == 'm5':
-        m5on = True
-        m5.clear()
-        for c in commands :
-            m5.append(c)
-        clearCommands()
-            
-    savePrefs()
-    interpAll()
-    return response()
- 
-# vider une mémoire    
-@route('/delMem/<m>')
-def delMem(m):
-    global m1on
-    global m2on
-    global m3on
-    global m4on
-    global m5on
-    #print("DEL MEM : ", m)
-    if(m == 'm1'):
-        m1on = False
-        m1.clear()
-    elif m == 'm2':
-        m2on = False
-        m2.clear()
-    elif m == 'm3':
-        m3on = False
-        m3.clear()
-    elif m == 'm4':
-        m4on = False
-        m4.clear()
-    elif m == 'm5':
-        m5on = False
-        m5.clear()
-       
-    savePrefs()
-    interpAll()
-    return response()
-   
-#sauvegarde des préférences 
-def savePrefs():
-    with open('lkpi-config.json', 'w', encoding='utf-8') as f:
-        json.dump(response(),f, ensure_ascii=False, indent=4)
+        # stockage des mémoires et leur état on/off
+        self.m1on = False
+        self.m1 = []
+        self.m2on = False
+        self.m2 = []
+        self.m3on = False
+        self.m3 = []
+        self.m4on = False
+        self.m4 = []
+        self.m5on = False
+        self.m5 = []
+        
+        self.config = 'lkpi-config.json'
+        # init 
+        self.clearBuffer()
+        self.readPrefs()
+        
+        print("LightKeyPI starting...")
+        
+        self.host = '0.0.0.0'
+        self.port = int(os.environ.get("PORT", 17995))
+        self.server = Bottle()
+        self.route()     
+        
+    def start(self):
+        # démarrage du serveur
+        self.server.run(host=self.host, port=self.port) 
+        
+    def savePrefs(self):
+        #sauvegarde des préférences 
+        with open(self.config, 'w', encoding='utf-8') as f:
+            json.dump(self.response(),f, ensure_ascii=False, indent=4)
+        
+    def readPrefs(self):
+        #lecture des préférences (au chargement)
+        print("Reading preferences...")
+        with open(self.config) as f:
+            data = json.load(f)
+            print(json.dumps(data, indent=4, sort_keys=True))
+            self.outmode = data['outmode']
+            self._ip = data['_ip']
+            self._mask = data['_mask']
+            self._univ = data['_univ']
+            self.m1 = data['m1']['content']
+            self.m2 = data['m2']['content']
+            self.m3 = data['m3']['content']
+            self.m4 = data['m4']['content']
+            self.m5 = data['m5']['content']
+            print("...done")
+            self.onNetworkChange()
     
-#lecture des préférences (au chargement)
-def readPrefs():
-    print("Reading preferences...")
-    global outmode
-    global _ip
-    global _mask
-    global _univ
-    global m1
-    global m2
-    global m3
-    global m4
-    global m5
+    def route(self):
+        self.server.route('/', method="GET", callback=self.index)
+        self.server.route('/<filename>', method="GET", callback=self.serve)
+        self.server.route('/state', method="GET", callback=self.state)
+        self.server.route('/fader/<v>', method="GET", callback=self.fader)
+        self.server.route('/ip/<v>', method="GET", callback=self.ip)
+        self.server.route('/mask/<v>', method="GET", callback=self.mask)
+        self.server.route('/univ/<v>', method="GET", callback=self.univ)
+        self.server.route('/togMem/<m>', method="GET", callback=self.togMem)
+        self.server.route('/recMem/<m>', method="GET", callback=self.recMem)
+        self.server.route('/delMem/<m>', method="GET", callback=self.delMem)
+        self.server.route('/button/<but>', method="GET", callback=self.button)
+    
+    def index(self):
+        # fonction qui renvoie la page web
+        return template('index')
+    
+    def serve(self, filename):
+        # fonction pour renvoyer les fichiers statiques
+        return static_file(filename, root='./'); 
 
-    with open('lkpi-config.json') as f:
-        data = json.load(f)
-        print(json.dumps(data, indent=4, sort_keys=True))
-        outmode = data['outmode']
-        _ip = data['_ip']
-        _mask = data['_mask']
-        _univ = data['_univ']
-        m1 = data['m1']['content']
-        m2 = data['m2']['content']
-        m3 = data['m3']['content']
-        m4 = data['m4']['content']
-        m5 = data['m5']['content']
-        print("...done")
-        onNetworkChange()
+    def state(self):
+        # retourne l'état en cours du serveur vers la page web
+        return self.response()
+
+    def fader(self, v):
+        # c'est là que le potard entre
+        self.fadV = v
+        #print('> fader :',self.fadV)
+        self.command = 'ALL @ '+self.fadV
+        self.last = "allFad"
+        self.testCommand()
+        return self.response()
+
+    def ip(self, v):
+        #set IP
+        self._ip = v
+        print('> TODO ip :', self._ip)
+        self.onNetworkChange()
+        self.savePrefs()
+        return self.response()
+       
+    def mask(self, v):
+        #set Mask 
+        self._mask = v
+        print('> mask :', self._mask)
+        self.onNetworkChange()
+        self.savePrefs()
+        return self.response()
+        
+    def univ(self, v):
+        #set Universe
+        self._univ = v
+        print('> univ :', self._univ)
+        self.onNetworkChange()
+        self.savePrefs()
+        return self.response()
+
+    def togMem(self, m):
+        # mettre une mémoire on/off 
+        #print("TOGGLE MEM : ", m)
+        if(m == "m1" and len(self.m1) > 0):
+            self.m1on = not self.m1on
+        elif(m == "m2" and len(self.m2) > 0):
+            self.m2on = not self.m2on
+        elif(m == "m3" and len(self.m3) > 0):
+            self.m3on = not self.m3on
+        elif(m == "m4" and len(self.m4) > 0):
+            self.m4on = not self.m4on
+        elif(m == "m5" and len(self.m5) > 0):
+            self.m5on = not self.m5on
+            
+        self.interpAll()
+        return self.response()
+
+    def recMem(self, m):
+        # stocker la trame dans une mémoire
+        #print("REC MEM : ", m)
+        if(len(self.commands)==0):
+            return
+        if(m == 'm1'):
+            self.m1on = True
+            self.m1.clear()
+            for c in self.commands :
+                self.m1.append(c)
+            self.clearCommands()
+        elif m == 'm2':
+            self.m2on = True
+            self.m2.clear()
+            for c in self.commands :
+                self.m2.append(c)
+            self.clearCommands()
+        elif m == 'm3':
+            self.m3on = True
+            self.m3.clear()
+            for c in self.commands :
+                self.m3.append(c)
+            self.clearCommands()
+        elif m == 'm4':
+            self.m4on = True
+            self.m4.clear()
+            for c in self.commands :
+                self.m4.append(c)
+            self.clearCommands()
+        elif m == 'm5':
+            self.m5on = True
+            self.m5.clear()
+            for c in self.commands :
+                self.m5.append(c)
+            self.clearCommands()
+                
+        self.savePrefs()
+        self.interpAll()
+        return self.response()
+     
+    def delMem(self, m):
+        # vider une mémoire    
+        #print("DEL MEM : ", m)
+        if(m == 'm1'):
+            self.m1on = False
+            self.m1.clear()
+        elif m == 'm2':
+            self.m2on = False
+            self.m2.clear()
+        elif m == 'm3':
+            self.m3on = False
+            self.m3.clear()
+        elif m == 'm4':
+            self.m4on = False
+            self.m4.clear()
+        elif m == 'm5':
+            self.m5on = False
+            self.m5.clear()
+           
+        self.savePrefs()
+        self.interpAll()
+        return self.response()
+
+    def button(self, but):
+        #print('> button :',but)
+        if but == "active" :
+            self.togActive()
+        elif but == "command" :
+            #command = "none"
+            #print("(click on command line, does nothing)")
+            pass
+        elif but == "mode" :
+            #command = "none"
+            #print("(click on mode, does nothing on server)")
+            pass
+        elif but == "outLK" :
+            self.outmode = 0
+            self.savePrefs()
+            self.onNetworkChange()
+        elif but == "outMerge" :
+            self.outmode = 1
+            self.savePrefs()
+            self.onNetworkChange()
+        elif but == "outArtnet" :
+            self.outmode = 2
+            self.savePrefs()
+            self.onNetworkChange()
+        else:
+            if self.command == "none":
+                self.command = ""
+                self.last = "none"
+            if but == "1" :
+                self.command += "1"
+                self.last = "num"
+            elif but == "2" :
+                self.command += "2"
+                self.last = "num"
+            elif but == "3" :
+                self.command += "3"
+                self.last = "num"
+            elif but == "4" :
+                self.command += "4"
+                self.last = "num"
+            elif but == "5" :
+                self.command += "5"
+                self.last = "num"
+            elif but == "6" :
+                self.command += "6"
+                self.last = "num"
+            elif but == "7" :
+                self.command += "7"
+                self.last = "num"
+            elif but == "8" :
+                self.command += "8"
+                self.last = "num"
+            elif but == "9" :
+                self.command += "9"
+                self.last = "num"
+            elif but == "0" :
+                if self.last == "num" or self.last == "at":
+                    self.command += "0"
+                    self.last = "num"
+            elif but == "plus" :
+                if self.last == "num":
+                    self.command += " + "
+                    self.last = "plus"
+            elif but == "minus" :
+                if self.last == "num":
+                    self.command += " - "
+                    self.last = "minus"
+            elif but == "thru" :
+                if self.last == "num":
+                    self.command += " THRU "
+                    self.last = "thru"
+            elif but == "at" :
+                if self.last == "at":
+                        self.command += " FULL"
+                        self.last = "full"
+                elif self.last == "num":
+                    self.command += " @ "
+                    self.last = "at"
+            elif but == "clear" :
+                self.clear()
+            elif but == "allFad" :
+                self.command = 'ALL @ '+self.fadV
+                self.last = "allFad"
+            elif but == "allRamp" :
+                self.command = 'ALL @ RAMP'
+                self.last = "allRamp"
+            else:
+                print('>> NO ACTION : ',but)
+        
+        self.testCommand()
+        return self.response()
+
+    def response(self):
+        # sert à retourner les infos à la page web et à stocker la config dans le fichier json
+        return { 'state': self.active, 
+                'command': self.command, 
+                'commands': self.commands, 
+                '_ip': self._ip, 
+                '_mask': self._mask, 
+                '_univ': self._univ, 
+                'outmode': self.outmode, 
+                'm1': { 
+                    'on': self.m1on, 
+                    'content': self.m1 
+                    }, 
+                'm2': {
+                    'on': self.m2on, 
+                    'content': self.m2
+                    }, 
+                'm3': {
+                    'on': self.m3on,
+                    'content': self.m3
+                    }, 
+                'm4': {
+                    'on': self.m4on,
+                    'content': self.m4
+                    }, 
+                'm5': {
+                    'on': self.m5on,
+                    'content': self.m5
+                    }
+                }
+    
+    def clear(self):
+        # vider la commande / la trame en cours
+        print('CLEAR')
+        if self.last == "pop" :
+            self.commands.clear()
+            self.command = "none"
+            self.last = "none"
+        elif self.last == "none" :
+            self.commands.pop()
+            self.command = "none"
+            self.last = "pop"
+        elif self.last == "num" :
+            self.command = self.command[:-1]
+        elif self.last == "plus" :
+            self.command = self.command[:-3]
+        elif self.last == "minus" :
+            self.command = self.command[:-3]
+        elif self.last == "thru" :
+            self.command = self.command[:-6]
+        elif self.last == "at" :
+            self.command = self.command[:-3]
+        elif self.last == "full" :
+            self.command = self.command[:-5]
+        else:
+            self.command = "none"
+        
+        if len(self.command) == 0: 
+            self.command = "none"
+            self.last = "none"
+        elif self.command == "none":
+            self.last = "none"
+        elif re.findall("[0-9]", self.command[-1:]):
+            self.last = "num"
+        elif self.command[-3:] == " + ":
+            self.last = "plus"
+        elif self.command[-3:] == " - ":
+            self.last = "minus"
+        elif self.command[-3:] == " @ ":
+            self.last = "at"
+        elif self.command[-5:] == " FULL":
+            self.last = "full"
+        elif self.command[-6:] == " THRU ":
+            self.last = "full"
+        else:
+            self.command = "none"
+            self.last = "none"
+            #print("OTHER "+self.command[-6:])
+            
+        self.interpAll()
+    
+    def clearBuffer(self):
+        # initialise/vide le buffer dmx
+        self.buffer.clear()
+        for _x in range(512):
+            self.buffer.append(0)
+            
+    def clearCommands(self):
+        # vide la trame en cours
+        self.commands.clear()
+      
+    def testCommand(self):
+        # teste si la commande en cours est terminée (2 digits après un @ ou All Ramp)    
+        #print("[-2:1] \"",self.command[-2:], "\"")
+        if self.command == "none":
+            return
+        if self.last == "allRamp" or self.last == "allFad":
+            self.clearCommands()
+            self.interpCommand()
+        elif re.findall(" @ ", self.command):
+            if re.findall("FULL", self.command) or re.match(r'^([\d]+)$', self.command[-2:]) :
+                self.interpCommand()
+     
+    def interpCommand(self):
+        # ajoute la commande en cours à la trame    
+        #print("LAST CMD : ", command)
+        self.commands.append(self.command)
+        self.command = "none"
+        self.interpAll()
+    
+    def interpAll(self):
+        # interprète toutes les commandes de la trame + les mémoires      
+        self.clearBuffer()
+        if len(self.commands) > 0 :
+            #print("INTERP GLOBAL")
+            for x in self.commands :
+                self.interpOne(x)
+        if self.m1on:
+            #print("INTERP M1")
+            for x in self.m1 :
+                self.interpOne(x)
+        if self.m2on:
+            #print("INTERP M2")
+            for x in self.m2 :
+                self.interpOne(x)
+        if self.m3on:
+            #print("INTERP M3")
+            for x in self.m3 :
+                self.interpOne(x)
+        if self.m4on:
+            #print("INTERP M4")
+            for x in self.m4 :
+                self.interpOne(x)
+        if self.m5on:
+            #print("INTERP M5")
+            for x in self.m5 :
+                self.interpOne(x)
+                            
+        self.sendBuffer()
+    
+    def interpOne(self, cmd):
+        # interprète une seule commande      
+        #print("INTERP ",cmd)
+        spl = cmd.split(' @ ')
+        if spl[1] == "FULL" :
+            atValue = 100
+        elif spl[1] == "RAMP" :
+            atValue = "RAMP"
+        else:
+            try:
+                atValue = int(spl[1])
+            except:
+                atValue = 100
+        idx = 0
+        prevNum = -1
+        prevFunc = "none"
+        selSpl = spl[0].split(' ')
+        selection = []
+        while(idx < len(selSpl)):
+            try:
+                n = int(selSpl[idx])
+                if n > 512 :
+                    n = 512
+                if(prevFunc == "none"):
+                    selection.append(n)
+                elif prevFunc == "+" :
+                    selection.append(n)
+                elif prevFunc == "-" :
+                    selection.remove(n)
+                elif prevFunc == "THRU" :
+                    for x in range(prevNum, n+1):
+                        selection.append(x)
+                prevNum = n
+            except:
+                if selSpl[idx] == "ALL" :
+                    for x in range(1, 512+1):
+                        selection.append(x)
+                else:   
+                    prevFunc = selSpl[idx]
+            idx += 1
+        selection = list(set(selection))
+        #print(">>>>> ",selection, " @ ", atValue)
+        for x in selection :
+            self.buffer[x-1] = atValue
+    
+    def togActive(self):
+        self.active = not self.active
+        print("TODO ACTIVE/INACTIVE ", self.active)
+    
+    def sendBuffer(self):
+        # envoie le buffer dans le DMX     
+        print("TODO SEND BUFFER TO DMX ", self.buffer)
+        #dépends de outmode & active & paramètres réseau
+        #attention quand ALL @ RAMP est activé la valeur dans le buffer est 'RAMP'
+      
+    def onNetworkChange(self):
+        # si les paramètres réseau outmode/ip/mask/univ changent c'est ici que ça se passe 
+        print("TODO NETWORK PARAMETERS CHANGED")
 
 # tous les autres boutons
-@route('/button/<but>')
-def button(but):
-    print('> button :',but)
-    global command
-    global last
-    global active
-    global outmode
-    if but == "active" :
-        if active:
-            active = False
-        else:
-            active = True
-    elif but == "command" :
-        #command = "none"
-        #print("(click on command line, does nothing)")
-        pass
-    elif but == "mode" :
-        #command = "none"
-        #print("(click on mode, does nothing on server)")
-        pass
-    elif but == "outLK" :
-        outmode = 0
-        savePrefs()
-        onNetworkChange()
-    elif but == "outMerge" :
-        outmode = 1
-        savePrefs()
-        onNetworkChange()
-    elif but == "outArtnet" :
-        outmode = 2
-        savePrefs()
-        onNetworkChange()
-    else:
-        if command == "none":
-            command = ""
-            last = "none"
-        if but == "1" :
-            command += "1"
-            last = "num"
-        elif but == "2" :
-            command += "2"
-            last = "num"
-        elif but == "3" :
-            command += "3"
-            last = "num"
-        elif but == "4" :
-            command += "4"
-            last = "num"
-        elif but == "5" :
-            command += "5"
-            last = "num"
-        elif but == "6" :
-            command += "6"
-            last = "num"
-        elif but == "7" :
-            command += "7"
-            last = "num"
-        elif but == "8" :
-            command += "8"
-            last = "num"
-        elif but == "9" :
-            command += "9"
-            last = "num"
-        elif but == "0" :
-            if last == "num" or last == "at":
-                command += "0"
-                last = "num"
-        elif but == "plus" :
-            if last == "num":
-                command += " + "
-                last = "plus"
-        elif but == "minus" :
-            if last == "num":
-                command += " - "
-                last = "minus"
-        elif but == "thru" :
-            if last == "num":
-                command += " THRU "
-                last = "thru"
-        elif but == "at" :
-            if last == "at":
-                    command += " FULL"
-                    last = "full"
-            elif last == "num":
-                command += " @ "
-                last = "at"
-        elif but == "clear" :
-            clear()
-        elif but == "allFad" :
-            command = 'ALL @ '+fadV
-            last = "allFad"
-        elif but == "allRamp" :
-            command = 'ALL @ RAMP'
-            last = "allRamp"
-        else:
-            print('>> NO ACTION : ',but)
-    
-    testCommand()
-    return response()
 
-# vider la commande / la trame en cours
-def clear():
-    global last
-    global commands
-    global command
-    print('CLEAR')
-    if last == "pop" :
-        commands.clear()
-        command = "none"
-        last = "none"
-    elif last == "none" :
-        commands.pop()
-        command = "none"
-        last = "pop"
-    elif last == "num" :
-        command = command[:-1]
-    elif last == "plus" :
-        command = command[:-3]
-    elif last == "minus" :
-        command = command[:-3]
-    elif last == "thru" :
-        command = command[:-6]
-    elif last == "at" :
-        command = command[:-3]
-    elif last == "full" :
-        command = command[:-5]
-    else:
-        command = "none"
-    
-    if len(command) == 0: 
-        command = "none"
-        last = "none"
-    elif command == "none":
-        last = "none"
-    elif re.findall("[0-9]", command[-1:]):
-        last = "num"
-    elif command[-3:] == " + ":
-        last = "plus"
-    elif command[-3:] == " - ":
-        last = "minus"
-    elif command[-3:] == " @ ":
-        last = "at"
-    elif command[-5:] == " FULL":
-        last = "full"
-    elif command[-6:] == " THRU ":
-        last = "full"
-    else:
-        command = "none"
-        last = "none"
-        #print("OTHER "+command[-6:])
-        
-    interpAll()
-
-# initialise/vide le buffer dmx
-def clearBuffer():
-    global buffer
-    buffer.clear()
-    for x in range(512):
-        buffer.append(0)
-        
-# vide la trame en cours
-def clearCommands():
-    global commands
-    commands.clear()
-  
-# teste si la commande en cours est terminée (2 digits après un @ ou All Ramp)    
-def testCommand():
-    global command
-    global commands
-    global last
-    #print("[-2:1] \"",command[-2:], "\"")
-    if command == "none":
-        return
-    if last == "allRamp" or last == "allFad":
-        clearCommands()
-        interpCommand()
-    elif re.findall(" @ ", command):
-        if re.findall("FULL", command) or re.match(r'^([\d]+)$', command[-2:]) :
-            interpCommand()
- 
-# ajoute la commande en cours à la trame    
-def interpCommand():
-    global command
-    global commands
-    #print("LAST CMD : ", command)
-    commands.append(command)
-    command = "none"
-    interpAll()
-
-# interprète toutes les commandes de la trame + les mémoires      
-def interpAll():
-    clearBuffer()
-    if len(commands) > 0 :
-        #print("INTERP GLOBAL")
-        for x in commands :
-            interpOne(x)
-    if m1on:
-        #print("INTERP M1")
-        for x in m1 :
-            interpOne(x)
-    if m2on:
-        #print("INTERP M2")
-        for x in m2 :
-            interpOne(x)
-    if m3on:
-        #print("INTERP M3")
-        for x in m3 :
-            interpOne(x)
-    if m4on:
-        #print("INTERP M4")
-        for x in m4 :
-            interpOne(x)
-    if m5on:
-        #print("INTERP M5")
-        for x in m5 :
-            interpOne(x)
-                        
-    print("BUFFER ",buffer)
-    sendBuffer()
-
-# interprète une seule commande      
-def interpOne(cmd):
-    global buffer
-    #print("INTERP ",cmd)
-    spl = cmd.split(' @ ')
-    if spl[1] == "FULL" :
-        atValue = 100
-    elif spl[1] == "RAMP" :
-        atValue = "RAMP"
-    else:
-        try:
-            atValue = int(spl[1])
-        except:
-            atValue = 100
-    idx = 0
-    prevNum = -1
-    prevFunc = "none"
-    selSpl = spl[0].split(' ')
-    selection = []
-    while(idx < len(selSpl)):
-        try:
-            n = int(selSpl[idx])
-            if n > 512 :
-                n = 512
-            if(prevFunc == "none"):
-                selection.append(n)
-            elif prevFunc == "+" :
-                selection.append(n)
-            elif prevFunc == "-" :
-                selection.remove(n)
-            elif prevFunc == "THRU" :
-                for x in range(prevNum, n+1):
-                    selection.append(x)
-            prevNum = n
-        except:
-            if selSpl[idx] == "ALL" :
-                for x in range(1, 512+1):
-                    selection.append(x)
-            else:   
-                prevFunc = selSpl[idx]
-        idx += 1
-    selection = list(set(selection))
-    print(">>>>> ",selection, " @ ", atValue)
-    for x in selection :
-        buffer[x-1] = atValue
-
-# envoie le buffer dans le DMX     
-def sendBuffer():
-    print("TODO SEND BUFFER TO DMX")
-    #dépends de outmode & active & paramètres réseau
-    #attention quand ALL @ RAMP est activé la valeur dans le buffer est 'RAMP'
-  
-# si les paramètres réseau outmode/ip/mask/univ changent c'est ici que ça se passe 
-def onNetworkChange():
-    print("TODO NETWORK PARAMETERS CHANGED")   
-
-# init 
-clearBuffer()
-readPrefs()
-
-# démarrage du serveur
-port = int(os.environ.get("PORT", 17995))
-run(host='0.0.0.0', port=port)	
-
+if __name__ == "__main__":
+    server = LightKeyServer()
+    server.start()

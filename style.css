@@ -38,6 +38,14 @@ body
 	margin: auto;
 }
 
+#page {
+	display: grid;
+	justify-content: center;
+	grid-template-columns: 100% 100% 100%;
+	padding: 0px 100%;
+	width: 100%;
+}
+
 .cmd {
 	font-family: OrkneyRegular;
   	background-color: rgb(17,127,126);
@@ -93,7 +101,8 @@ body
 	border-radius: 10px;
 	margin: 10px;
 	padding: 0px;
-	padding-top: 4px;	
+	padding-top: 4px;
+	transition: 0.2s;	
 }
 
 .button1 {
@@ -264,6 +273,7 @@ body
 	font-family: OrkneyRegular;
 	margin-top: 0px;
 	position: relavite;
+	height: 26.3px;
 }
 
 .slider.slider-vertical .slider-tick-label-container {

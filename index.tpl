@@ -35,6 +35,7 @@
    		_mask = "";
    		_univ = "";
    		memF = "none";
+   		var fadV = 0;
    		var slider;
 	
    		// envoie la valeur du potard au serveur
@@ -319,75 +320,86 @@
 				mode = 0;
 			//console.log("switchMode : "+mode);
 			doModeSwitch();
-			$.get('/button/mode', function( data ) {
-				treatData(data);
-			});
 		}
 	
 		function doModeSwitch() {
-			$("#content").empty();
-			$("#content").append('<div class="crop"><img id="logo" alt="logo akwariom" src="/logo_web.png" onclick="notify(this.id)"></img></div>');
-			$("#content").append('<button id="mode" aria-label="Mode" class="but button1 butfont2 b2" onclick="switchMode()">MODE</button>');
-			$("#content").append('<button id="active" aria-label="On/Off" class="but button2 butfont2 b3" onclick="clickBut(this.id)">ON</button>');
-			$("#content").append('<button id="command" aria-label="Command Line" class="cmd bb3" onclick="clickBut(this.id)"></button>');
-			switch(mode)
+			$("#page").fadeOut("fast", function()
 			{
-				case 0: // page 1 (télec)
-					$("#content").append('<button id="plus" aria-label="+" class="but button1 b1" onclick="clickBut(this.id)">+</button>');
-					$("#content").append('<button id="minus" aria-label="-" class="but button1 b2 butfont3" onclick="clickBut(this.id)">-</button>');
-					$("#content").append('<button id="thru" aria-label="thru" class="but button1 butfont2 b3" onclick="clickBut(this.id)">THRU</button>');
-					$("#content").append('<button id="7" aria-label="7" class="but button1 b1" onclick="clickBut(this.id)">7</button>');
-					$("#content").append('<button id="8" aria-label="8" class="but button1 b2" onclick="clickBut(this.id)">8</button>');
-					$("#content").append('<button id="9" aria-label="9" class="but button1 b3" onclick="clickBut(this.id)">9</button>');
-					$("#content").append('<button id="4" aria-label="4" class="but button1 b1" onclick="clickBut(this.id)">4</button>');
-					$("#content").append('<button id="5" aria-label="5" class="but button1 b2" onclick="clickBut(this.id)">5</button>');
-					$("#content").append('<button id="6" aria-label="6" class="but button1 b3" onclick="clickBut(this.id)">6</button>');
-					$("#content").append('<button id="1" aria-label="1" class="but button1 b1" onclick="clickBut(this.id)">1</button>');
-					$("#content").append('<button id="2" aria-label="2" class="but button1 b2" onclick="clickBut(this.id)">2</button>');
-					$("#content").append('<button id="3" aria-label="3" class="but button1 b3" onclick="clickBut(this.id)">3</button>');
-					$("#content").append('<button id="clear" aria-label="clear" class="but button1 butfont2 b1" onclick="clickBut(this.id)">CLEAR</button>');
-					$("#content").append('<button id="0" aria-label="0" class="but button1 b2" onclick="clickBut(this.id)">0</button>');
-					$("#content").append('<button id="at" aria-label="at level" class="but button1 b3 butfont3" onclick="clickBut(this.id)">@</button>');
-					break;
-				case 1: // page 2 (fader)
-					$("#content").append('<button id="allFad" aria-label="all at fader level" class="but button1 b1 butfont4" onclick="clickBut(this.id)">ALL @<br/>FADER</button>');
-					$("#content").append('<input id="slider" aria-label="fader" type="text" data-slider-min="0" data-slider-max="100" data-slider-step="1" data-slider-value="0" data-slider-orientation="vertical"/>');
-					$("#content").append('<button id="allRamp" aria-label="all at ramp" class="but button1 b1 butfont4" onclick="clickBut(this.id)">ALL @<br/>RAMP</button>');
-					$("#content").append('<button id="allFF" aria-label="all at 100%" class="but button1 b1 butfont4" onclick="setFader(100)">ALL @<br/>FULL</button>');
-					$("#content").append('<button id="all50" aria-label="all at 50%" class="but button1 b1 butfont4" onclick="setFader(50)">ALL @<br/>50</button>');
-					$("#content").append('<button id="all0" aria-label="all at 0%" class="but button1 b1 butfont4" onclick="setFader(0)">ALL @<br/>0</button>');
-					slider = new Slider('#slider', {
-						reversed: true,
-						ticks: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
-						ticks_labels: ['0', '10', '20', '30', '40', '50', '60', '70', '80', '90', '100'],
-						formatter: function(value) {
-							return '';
-						}
-					});
-					slider.on('slideStop', function(slideEvt) {
-						sendFader();
-					});
-					break;
-				case 2: // page 3 (config)
-					$("#content").append('<button id="outLK" aria-label="Only lightkey" class="but button1 bb3 butfont5" onclick="clickBut(this.id)">ONLY LIGHTKEY<br/>ON DMX OUTPUT</button>');
-					$("#content").append('<button id="outMerge" aria-label="Merge lightkey and dmx in" class="but button1 bb3 butfont5" onclick="clickBut(this.id)">MERGE DMX-IN & LIGHTKEY<br/>ON DMX OUTPUT</button>');
-					$("#content").append('<button id="outArtnet" aria-label="Artnet Output" class="but button1 bb3 butfont5" onclick="clickBut(this.id)">ARTNET OUTPUT</button>');
-					$("#content").append('<button id="setIp" aria-label="Set Network Ip Address" class="but button1 b1 butfont5" onclick="setIp()">SET<br/>IP</button>');
-					$("#content").append('<button id="setMask" aria-label="Set Network Mask" class="but button1 b2 butfont5" onclick="setMask()">SET<br/>MASK</button>');
-					$("#content").append('<button id="setUniv" aria-label="Set Artnet Universe" class="but button1 b3 butfont5" onclick="setUniv()">SET<br/>UNIV</button>');
-					$("#content").append('<button id="dispIP" aria-label="Display Network Parameters" class="but button3 bb3 butfont6"></button>');
-					break;
-				case 3: // page 4 (mémoires)
-					$("#content").append('<button id="m1" aria-label="Memory 1" class="but button4 bb2 butfont2" onclick="toggleMem(this.id)">MEM 1</button>');
-					$("#content").append('<button id="m2" aria-label="Memory 2" class="but button4 bb2 butfont2" onclick="toggleMem(this.id)">MEM 2</button>');
-					$("#content").append('<button id="m3" aria-label="Memory 3" class="but button4 bb2 butfont2" onclick="toggleMem(this.id)">MEM 3</button>');
-					$("#content").append('<button id="m4" aria-label="Memory 4" class="but button4 bb2 butfont2" onclick="toggleMem(this.id)">MEM 4</button>');
-					$("#content").append('<button id="rec" aria-label="Record memory" class="but button1 butfont2 b3" onclick="recMem()">REC</button>');
-					$("#content").append('<button id="m5" aria-label="Memory 5" class="but button4 bb2 butfont2" onclick="toggleMem(this.id)">MEM 5</button>');
-					$("#content").append('<button id="del" aria-label="Delete memory" class="but button1 butfont2 b3" onclick="delMem()">DEL</button>');
-					break;
-			}
-			
+				$("#page").empty();
+				//$("#content").empty();
+				//$("#content").append('<div class="crop"><img id="logo" alt="logo akwariom" src="/logo_web.png" onclick="notify(this.id)"></img></div>');
+				//$("#content").append('<button id="mode" aria-label="Mode" class="but button1 butfont2 b2" onclick="switchMode()">MODE</button>');
+				//$("#content").append('<button id="active" aria-label="On/Off" class="but button2 butfont2 b3" onclick="clickBut(this.id)">ON</button>');
+				//$("#content").append('<button id="command" aria-label="Command Line" class="cmd bb3" onclick="clickBut(this.id)"></button>');
+				switch(mode)
+				{
+					case 0: // page 1 (télec)
+						$("#page").append('<button id="plus" aria-label="+" class="but button1 b1" onclick="clickBut(this.id)">+</button>');
+						$("#page").append('<button id="minus" aria-label="-" class="but button1 b2 butfont3" onclick="clickBut(this.id)">-</button>');
+						$("#page").append('<button id="thru" aria-label="thru" class="but button1 butfont2 b3" onclick="clickBut(this.id)">THRU</button>');
+						$("#page").append('<button id="7" aria-label="7" class="but button1 b1" onclick="clickBut(this.id)">7</button>');
+						$("#page").append('<button id="8" aria-label="8" class="but button1 b2" onclick="clickBut(this.id)">8</button>');
+						$("#page").append('<button id="9" aria-label="9" class="but button1 b3" onclick="clickBut(this.id)">9</button>');
+						$("#page").append('<button id="4" aria-label="4" class="but button1 b1" onclick="clickBut(this.id)">4</button>');
+						$("#page").append('<button id="5" aria-label="5" class="but button1 b2" onclick="clickBut(this.id)">5</button>');
+						$("#page").append('<button id="6" aria-label="6" class="but button1 b3" onclick="clickBut(this.id)">6</button>');
+						$("#page").append('<button id="1" aria-label="1" class="but button1 b1" onclick="clickBut(this.id)">1</button>');
+						$("#page").append('<button id="2" aria-label="2" class="but button1 b2" onclick="clickBut(this.id)">2</button>');
+						$("#page").append('<button id="3" aria-label="3" class="but button1 b3" onclick="clickBut(this.id)">3</button>');
+						$("#page").append('<button id="clear" aria-label="clear" class="but button1 butfont2 b1" onclick="clickBut(this.id)">CLEAR</button>');
+						$("#page").append('<button id="0" aria-label="0" class="but button1 b2" onclick="clickBut(this.id)">0</button>');
+						$("#page").append('<button id="at" aria-label="at level" class="but button1 b3 butfont3" onclick="clickBut(this.id)">@</button>');
+						break;
+					case 1: // page 2 (fader)
+						$("#page").append('<button id="allFad" aria-label="all at fader level" class="but button1 b1 butfont4" onclick="clickBut(this.id)">ALL @<br/>FADER</button>');
+						$("#page").append('<input id="slider" aria-label="fader" type="text" data-slider-min="0" data-slider-max="100" data-slider-step="1" data-slider-value="0" data-slider-orientation="vertical"/>');
+						$("#page").append('<button id="allRamp" aria-label="all at ramp" class="but button1 b1 butfont4" onclick="clickBut(this.id)">ALL @<br/>RAMP</button>');
+						$("#page").append('<button id="allFF" aria-label="all at 100%" class="but button1 b1 butfont4" onclick="setFader(100)">ALL @<br/>FULL</button>');
+						$("#page").append('<button id="all50" aria-label="all at 50%" class="but button1 b1 butfont4" onclick="setFader(50)">ALL @<br/>50</button>');
+						$("#page").append('<button id="all0" aria-label="all at 0%" class="but button1 b1 butfont4" onclick="setFader(0)">ALL @<br/>0</button>');
+						slider = new Slider('#slider', {
+							reversed: true,
+							ticks: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+							ticks_labels: ['0', '10', '20', '30', '40', '50', '60', '70', '80', '90', '100'],
+							formatter: function(value) {
+								return '';
+							}
+						});
+						
+						setTimeout(function(){
+							slider.refresh();
+							slider.setValue(fadV);
+							slider.on('slideStop', function(slideEvt) {
+								sendFader();
+							});
+						}, 150);
+						
+						
+						break;
+					case 2: // page 3 (config)
+						$("#page").append('<button id="outLK" aria-label="Only lightkey" class="but button1 bb3 butfont5" onclick="clickBut(this.id)">ONLY LIGHTKEY<br/>ON DMX OUTPUT</button>');
+						$("#page").append('<button id="outMerge" aria-label="Merge lightkey and dmx in" class="but button1 bb3 butfont5" onclick="clickBut(this.id)">MERGE DMX-IN & LIGHTKEY<br/>ON DMX OUTPUT</button>');
+						$("#page").append('<button id="outArtnet" aria-label="Artnet Output" class="but button1 bb3 butfont5" onclick="clickBut(this.id)">ARTNET OUTPUT</button>');
+						$("#page").append('<button id="setIp" aria-label="Set Network Ip Address" class="but button1 b1 butfont5" onclick="setIp()">SET<br/>IP</button>');
+						$("#page").append('<button id="setMask" aria-label="Set Network Mask" class="but button1 b2 butfont5" onclick="setMask()">SET<br/>MASK</button>');
+						$("#page").append('<button id="setUniv" aria-label="Set Artnet Universe" class="but button1 b3 butfont5" onclick="setUniv()">SET<br/>UNIV</button>');
+						$("#page").append('<button id="dispIP" aria-label="Display Network Parameters" class="but button3 bb3 butfont6"></button>');
+						break;
+					case 3: // page 4 (mémoires)
+						$("#page").append('<button id="m1" aria-label="Memory 1" class="but button4 bb2 butfont2" onclick="toggleMem(this.id)">MEM 1</button>');
+						$("#page").append('<button id="m2" aria-label="Memory 2" class="but button4 bb2 butfont2" onclick="toggleMem(this.id)">MEM 2</button>');
+						$("#page").append('<button id="m3" aria-label="Memory 3" class="but button4 bb2 butfont2" onclick="toggleMem(this.id)">MEM 3</button>');
+						$("#page").append('<button id="m4" aria-label="Memory 4" class="but button4 bb2 butfont2" onclick="toggleMem(this.id)">MEM 4</button>');
+						$("#page").append('<button id="rec" aria-label="Record memory" class="but button1 butfont2 b3" onclick="recMem()">REC</button>');
+						$("#page").append('<button id="m5" aria-label="Memory 5" class="but button4 bb2 butfont2" onclick="toggleMem(this.id)">MEM 5</button>');
+						$("#page").append('<button id="del" aria-label="Delete memory" class="but button1 butfont2 b3" onclick="delMem()">DEL</button>');
+						break;
+				}
+				$.get('/button/mode', function( data ) {
+					treatData(data);
+					$("#page").fadeIn("fast");
+				});
+			});
 		}
 		
 		//initialisation une fois que la page est chargée
@@ -399,7 +411,13 @@
 </head>
 <body>
 	<div id="content">
-		<!-- c'est ici que vont s'insérer les éléments dynamiquement -->
+		<div class="crop"><img id="logo" alt="logo akwariom" src="/logo_web.png" onclick="notify(this.id)"></img></div>
+		<button id="mode" aria-label="Mode" class="but button1 butfont2 b2" onclick="switchMode()">MODE</button>
+		<button id="active" aria-label="On/Off" class="but button2 butfont2 b3" onclick="clickBut(this.id)">ON</button>
+		<button id="command" aria-label="Command Line" class="cmd bb3" onclick="clickBut(this.id)"></button>
+		<span id='page'>
+			<!-- c'est ici que vont s'insérer les éléments dynamiquement -->
+		</span>
 	</div>
 </body>
 </html>
