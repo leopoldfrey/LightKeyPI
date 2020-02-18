@@ -86,7 +86,7 @@ class LightKeyServer():
     
     def index(self):
         # fonction qui renvoie la page web
-        return template('index')
+        return static_file('index.html', root='./');# template('index')
     
     def serve(self, filename):
         # fonction pour renvoyer les fichiers statiques

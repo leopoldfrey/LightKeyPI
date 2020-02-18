@@ -1,30 +1,26 @@
 {
     "state": true,
     "command": "none",
-    "commands": [
-        "11 @ 66"
-    ],
+    "commands": [],
     "_ip": "2.0.0.1",
     "_mask": "255.0.0.0",
     "_univ": "0.0.1",
     "outmode": 2,
     "m1": {
         "on": false,
-        "content": [
-            "45 THRU 88 @  FULL"
-        ]
+        "content": []
     },
     "m2": {
-        "on": false,
+        "on": true,
         "content": [
             "501 THRU 507 @ 16"
         ]
     },
     "m3": {
-        "on": false,
+        "on": true,
         "content": [
-            "45 THRU 55 - 48 @ 88",
-            "1 + 2 @ 65"
+            "55 THRU 66 @ 20",
+            "1 THRU 5 - 4 @ 75"
         ]
     },
     "m4": {

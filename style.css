@@ -56,7 +56,7 @@ body
 	border-radius: 10px;
 	margin: 10px;
 	padding-top: 0px;
-	font-size: 10px;
+	font-size: 16px;
 	max-height: 55px;
 }
 
@@ -80,15 +80,15 @@ body
 
 .mem {
 	color: darkgreen;
-	font-family: OrkneyItalic;
+	/*font-family: OrkneyItalic;*/
 }
-
+/*
 .mem::before {
 	content:"(";
 }
 .mem::after {
 	content:")";
-}
+}*/
 
 .but {
 	font-family: OrkneyBold;
@@ -141,6 +141,19 @@ body
 
 .button4:hover {
 	background-color: rgb(107,107,107);/*rgb(0,148,208);*/
+}
+
+.button4 li {
+	display: inline-block;
+	padding-left: 5px;
+}
+
+.button4 li::before {
+	content: "(";
+}
+
+.button4 li::after {
+	content: ")";
 }
 
 .but4on {
