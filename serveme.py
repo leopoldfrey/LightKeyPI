@@ -8,11 +8,14 @@ class LightKeyServer():
         self.active = True
         # commande en cours
         self.command = "none"
+        self.test = "none"
         self.commands = []
         self.last = "none"
         self.buffer = []
         # valeur du potard page 2 (0-100%)
         self.fadV = "0"
+        # valeur du potard page 4 (0-100%)
+        self.fadV2 = "0"
         # mode de sortie
         self.outmode = 0 # 0 : light only / 1 : merge / 2 : artnet
         # config réseau
@@ -76,6 +79,9 @@ class LightKeyServer():
         self.server.route('/<filename>', method="GET", callback=self.serve)
         self.server.route('/state', method="GET", callback=self.state)
         self.server.route('/fader/<v>', method="GET", callback=self.fader)
+        self.server.route('/fader2/<v>', method="GET", callback=self.fader2)
+        self.server.route('/testPrev', method="GET", callback=self.testPrev)
+        self.server.route('/testNext', method="GET", callback=self.testNext)
         self.server.route('/ip/<v>', method="GET", callback=self.ip)
         self.server.route('/mask/<v>', method="GET", callback=self.mask)
         self.server.route('/univ/<v>', method="GET", callback=self.univ)
@@ -102,6 +108,62 @@ class LightKeyServer():
         #print('> fader :',self.fadV)
         self.command = 'ALL @ '+self.fadV
         self.last = "allFad"
+        self.testCommand()
+        return self.response()
+    
+    def fader2(self, v):
+        # c'est là que le potard 2 entre
+        self.fadV2 = v
+        #print('< fader2 :',self.fadV2, "self.command: ", self.command)
+        if self.last == "testFad" :
+            self.command = self.test + " @ " + (self.fadV2)
+            self.last = "testFad"
+            self.testCommand()
+        elif self.last == "none" or self.command == "none" :
+            return self.response();
+        elif self.last == "num" :
+            self.test = self.command.split(' ')[0];
+            self.command = self.test + " @ " + (self.fadV2)
+            self.last = "testFad"
+            self.testCommand()
+        elif self.last == "at" :
+            self.test = self.command[:-3].split(' ')[0];
+            self.command = self.test + " @ " + (self.fadV2)
+            self.last = "testFad"
+            self.testCommand()
+        elif self.last == "testFad" :
+            self.command = self.test + " @ " + (self.fadV2)
+            self.last = "testFad"
+            self.testCommand()
+            
+        #print('> fader2 :',self.fadV2, "self.command: ", self.command)
+        return self.response()
+
+    def testPrev(self):
+        if self.test != "none":
+            n = int(self.test)-1
+            if n <= 0 :
+                n = 512
+            self.test = str(n)
+        else:
+            self.test = "512"
+        self.command = self.test + " @ " + (self.fadV2)
+        self.last = "testFad"
+        #print("PREV : ", self.command)
+        self.testCommand()
+        return self.response()
+
+    def testNext(self):
+        if self.test != "none":
+            n = int(self.test)+1
+            if n > 512 :
+                n = 1
+            self.test = str(n)
+        else:
+            self.test = "1"
+        self.command = self.test + " @ " + (self.fadV2)
+        self.last = "testFad"
+        #print("NEXT : ", self.command)
         self.testCommand()
         return self.response()
 
@@ -398,7 +460,7 @@ class LightKeyServer():
         #print("[-2:1] \"",self.command[-2:], "\"")
         if self.command == "none":
             return
-        if self.last == "allRamp" or self.last == "allFad":
+        if self.last == "allRamp" or self.last == "allFad" or self.last == "testFad":
             self.clearCommands()
             self.interpCommand()
         elif re.findall(" @ ", self.command):
@@ -407,7 +469,7 @@ class LightKeyServer():
      
     def interpCommand(self):
         # ajoute la commande en cours à la trame    
-        #print("LAST CMD : ", command)
+        #print("LAST CMD : ", self.command)
         self.commands.append(self.command)
         self.command = "none"
         self.interpAll()
