@@ -292,6 +292,17 @@ body
 }
 
 .slider-track-high {
+	border-radius: 0px;
+	opacity: 0.7;
+}
+
+.slider.slider-horizontal .slider-selection {
+	background: rgb(255,145,146);/*rgb(127,247,246);*/
+	border-radius: 0px;
+	opacity: 0.7;
+}
+
+.slider.slider-vertical .slider-track-high {
 	background: rgb(255,145,146);/*rgb(127,247,246);*/
 	border-radius: 0px;
 	opacity: 0.7;
