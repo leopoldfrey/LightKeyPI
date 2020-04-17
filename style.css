@@ -201,6 +201,14 @@ body
   	padding-left: 12px;
 }
 
+.butfont_mem_big {
+	font-size: 30px;	
+}
+
+.butfont_mem_lit {
+	font-size: 12px;	
+}
+
 .b1 {
 	grid-column: 1 / 1;
 }
@@ -400,5 +408,71 @@ body
  		.crop {
 		width: 60px;
 		overflow: hidden;
+	}
+}
+
+@media only screen and (max-width: 480px) {
+	#desc {
+		font-size: 9px;
+	}
+	.but {
+		font-size: 24px;
+	}
+	.butfont2 {
+    	font-size: 18px;
+	}
+	.butfont3 {
+    	font-size: 30px;
+	}
+	.butfont5 {
+    	font-size: 13px;
+	}
+	.butfont4 {
+    	font-size: 13px;
+	}
+	.butfont6 {
+    	font-size: 9px;
+    }
+    .butfont_mem_big {
+		font-size: 24px;	
+	}
+	.butfont_mem_lit {
+		font-size: 10px;	
+	}
+	.slider-tick-label {
+		font-size: 10px;
+	}
+}
+
+@media only screen and (max-width: 320px) {
+	#desc {
+		font-size: 7px;
+	}
+	.but {
+		font-size: 20px;
+	}
+	.butfont2 {
+    	font-size: 16px;
+	}
+	.butfont3 {
+    	font-size: 24px;
+	}
+	.butfont5 {
+    	font-size: 11px;
+	}
+	.butfont4 {
+    	font-size: 11px;
+	}
+	.butfont6 {
+    	font-size: 9px;
+    }
+    .butfont_mem_big {
+		font-size: 20px;	
+	}
+	.butfont_mem_lit {
+		font-size: 9px;	
+	}
+ 	.slider-tick-label {
+		font-size: 9px;
 	}
 }

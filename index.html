@@ -231,51 +231,70 @@
 			
 			if(data.m1.content != "") {
 				$("#m1").html("M1");
-				$("#m1").css('font-size', '12px');
+				$("#m1").removeClass('butfont_mem_big');
+				$("#m1").addClass('butfont_mem_lit');
+				//$("#m1").css('font-size', '12px');
 				for (var c in data.m1.content)
 			    	$("#m1").append("<li>"+data.m1.content[c]+"</li>");
 			} else {
-				$("#m1").css('font-size', '30px');
+				$("#m1").addClass('butfont_mem_big');
+				$("#m1").removeClass('butfont_mem_lit');
+				//$("#m1").css('font-size', '30px');
 				$("#m1").html("MEM 1");
 			}
 			
 			if(data.m2.content != "") {
 				$("#m2").html("M2");
-				$("#m2").css('font-size', '12px');
+				$("#m2").removeClass('butfont_mem_big');
+				$("#m2").addClass('butfont_mem_lit');
+				//$("#m2").css('font-size', '12px');
 				for (var c in data.m2.content)
 			    	$("#m2").append("<li>"+data.m2.content[c]+"</li>");
 			} else {
-				$("#m2").css('font-size', '30px');
+				$("#m2").addClass('butfont_mem_big');
+				$("#m2").removeClass('butfont_mem_lit');
+				//$("#m2").css('font-size', '30px');
 				$("#m2").html("MEM 2");
 			}
 			
 			if(data.m3.content != "") {
 				$("#m3").html("M3");
-				$("#m3").css('font-size', '12px');
+				$("#m3").removeClass('butfont_mem_big');
+				$("#m3").addClass('butfont_mem_lit');
+				//$("#m3").css('font-size', '12px');
 				for (var c in data.m3.content)
 			    	$("#m3").append("<li>"+data.m3.content[c]+"</li>");
 			} else {
-				$("#m3").css('font-size', '30px');
+				$("#m3").addClass('butfont_mem_big');
+				$("#m3").removeClass('butfont_mem_lit');
+				//$("#m3").css('font-size', '30px');
 				$("#m3").html("MEM 3");
 			}
 			
 			if(data.m4.content != "") {
 				$("#m4").html("M4");
-				$("#m4").css('font-size', '12px');
+				$("#m4").removeClass('butfont_mem_big');
+				$("#m4").addClass('butfont_mem_lit');
+				//$("#m4").css('font-size', '12px');
 				for (var c in data.m4.content)
 			    	$("#m4").append("<li>"+data.m4.content[c]+"</li>");
 			} else {
-				$("#m4").css('font-size', '30px');
+				$("#m4").removeClass('butfont_mem_lit');
+				$("#m4").addClass('butfont_mem_big');//$("#m4").css('font-size', '30px');
 				$("#m4").html("MEM 4");
 			}
 			
 			if(data.m5.content != "") {
 				$("#m5").html("M5");
-				$("#m5").css('font-size', '12px');
+				//$("#m5").css('font-size', '12px');
+				$("#m5").removeClass('butfont_mem_big');
+				$("#m5").addClass('butfont_mem_lit');
 				for (var c in data.m5.content)
 			    	$("#m5").append("<li>"+data.m5.content[c]+"</li>");
 			} else {
-				$("#m5").css('font-size', '30px');
+				$("#m5").addClass('butfont_mem_big');
+				$("#m5").removeClass('butfont_mem_lit');
+				//$("#m5").css('font-size', '30px');
 				$("#m5").html("MEM 5");
 			}
 			
