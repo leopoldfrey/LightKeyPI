@@ -450,9 +450,11 @@
 			switch(mode)
 			{
 				case 0:
+					$("#desc").html("Keyboard");
 					$("#page1").fadeIn(fadeInDur);
 					break;
 				case 1:
+					$("#desc").html("Single Channel");
 					$(".slider-tick-label").css("opacity","0");
 					$("#page2").fadeIn(fadeInDur, function() {
 						slider2.refresh();
@@ -466,6 +468,7 @@
 					});
 					break;
 				case 2:
+					$("#desc").html("All Frame");
 					$(".slider-tick-label").css("opacity","0");
 					$("#page3").fadeIn(fadeInDur,function(){
 						slider.refresh();
@@ -480,9 +483,11 @@
 					});
 					break;
 				case 3:
+					$("#desc").html("Memories");
 					$("#page4").fadeIn(fadeInDur);
 					break;
 				case 4:
+					$("#desc").html("Configuration");
 					$("#page5").fadeIn(fadeInDur);
 					break;
 			}
@@ -497,7 +502,10 @@
 <body>
 	<div id="content">
 		<div class="crop"><img id="logo" alt="logo akwariom" src="/logo_web.png" onclick="notify(this.id)"></img></div>
-		<button id="mode" aria-label="Mode" class="but button1 butfont2 b2" onclick="switchMode()">MODE</button>
+		<button id="mode" aria-label="Mode" class="but button1 butfont2 b2" onclick="switchMode()">
+			<span id='mode_name'>MODE</span>
+			<span id='desc'>Keyboard</span>
+		</button>
 		<button id="active" aria-label="On/Off" class="but button2 butfont2 b3" onclick="clickBut(this.id)">ON</button>
 		<button id="command" aria-label="Command Line" class="cmd bb3" onclick="clickBut(this.id)"></button>
 		<span id='page1' class='page' style='display: none'>
